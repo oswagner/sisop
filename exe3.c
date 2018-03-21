@@ -4,56 +4,51 @@
 
 // Use fork(s) e pipe(s) para tal.
 
+    //   Nome: Wagner Oliveira dos Santos e Renata Soria
+
+    //   Comando de compilação: make
+
+    //   Ambiente em que foi desenvolvido:  macOS High Sierra v10.13.3 - compiler Apple LLVM version 9.0.0 (clang-900.0.39.2) Target: x86_64-apple-darwin17.4.0 Thread model: posix
+
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-int fileDescriptor[2];
-int value, pid;
+int fileDescriptorP1[2], fileDescriptorP2[2], fileDescriptorP3[2], fileDescriptorP4[2];
+int input, first_value, second_value, first_result, second_result;
+
+pid_t p1, p2, p3;
 
 int main() {
   
-  puts("Digite um valor");
-  scanf("%d",&value);
+  puts("Input some value");
+  scanf("%d",&input);
   fflush(stdin);
-  printf("Input = %d \n", value);
+  printf("Input N = %d \n", input);
 
-  // error to create a pipe
-  if (pipe(fileDescriptor) > 0) {
-    exit(1);
+  pipe(fileDescriptorP1);
+  pipe(fileDescriptorP2);
+  pipe(fileDescriptorP3);
+  pipe(fileDescriptorP4);
+
+  p1 = fork();
+  if (p1 > 0) {
+    write(fileDescriptorP1[1], &input, sizeof(input));
+    write(fileDescriptorP2[1], &input, sizeof(input));
+  } else if(p1 == 0 ) {
+    read(fileDescriptorP1[0], &first_value, sizeof(first_value));
+    int result = first_value * 2;
+    write(fileDescriptorP3[1], &result, sizeof(result));
   }
-
-  if (fork() != 0) {
-    write(fileDescriptor[1], &value, sizeof(value));
-    printf("Parent(%d) send value: %d\n", getpid(), value);
-  } else {
-    read(fileDescriptor[0], &value, sizeof(value));
-    printf("Child(%d) received value: %d\n", getpid(), value);
+  p2 = fork();
+  if (p2 > 0) {
+    read(fileDescriptorP2[0], &second_value, sizeof(second_value));
+    int result = second_value * 3;
+    write(fileDescriptorP4[1], &result, sizeof(result));
+  } else if (p2 == 0) {
+    read(fileDescriptorP3[0], &first_result, sizeof(first_result));
+    read(fileDescriptorP4[0], &second_result, sizeof(second_result));
+    printf("Result of n x 2 = %d - Result of n x 3 = %d \n", first_result, second_result);
   }
-
-
-//  printf("Eu sou o processo %ld, e meu pai e %ld\n",(long) getpid(), (long) getppid());
 }
-
-// int p0[2], p1[2] ;
-// char c, k ;
-// main()
-// {
-// int i, pid, pid1;
-// pipe(p0) ;
-// pid = fork() ;
-// if (pid != 0) {
-//         for (i=0; i<10; i++){
-//             puts("Digite um caracter: ");
-//             fflush(stdin);
-//             scanf("%c",&c); 
-//             write(p0[1], &c, sizeof(char));
-//             }
-//         } 
-// else {
-//      for (i=0;i<100;i++){
-//        read(p0[0], &k, sizeof(char)) ;
-//        printf("Lido do pipe: %c\n", k );
-//        }   
-//      }
-// }
