@@ -63,7 +63,7 @@ void monitorExit(struct Monitor *m){
 //  ------------------------------------------------------
 //  estruturas genericas de  variaveis condicao
 
-struct Condition{
+struct Condition {
     sem_t * s;              // semaforo para bloquear na condicao
     int count;              // contador de bloqueados
     struct Monitor * m;     // monitor associado aa condicao - quando bloqueia na condicao libera o monitor (next ou mutex)
@@ -180,7 +180,7 @@ void * produtor(){
     int i=0;
     while (1) {
         insere(i);
-        printf("ins: %d, in: %d \n",i,in);
+        printf("insere: %d, in: %d \n",i,in);
         i++;
     }
 }

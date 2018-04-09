@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-pthread -Wall 
 
 run: build
 	./exe4

@@ -18,6 +18,7 @@
 #define _REENTRANT 1
 #include <pthread.h>
 #include <stdio.h>
+#include <semaphore.h>
 
 #define size 10
 
@@ -25,13 +26,19 @@ pthread_t producer_id, consumer_id;
 
 int shared_data[size];
 
-int error_code; // helper for error handling
+sem_t* mutex;
 
-
-void* producer(void *param);
-void* consumer(void *param);
+void* producer();
+void* consumer();
+void log_shared_data(int *value);
 
 int main() {
+    printf("=========================== Main ===========================\n");
+    
+    log_shared_data(&shared_data);
+    
+    sem_init(&mutex,0,1);
+
     pthread_create(&producer_id, NULL, producer, NULL);
     pthread_create(&consumer_id, NULL, consumer, NULL);
 
@@ -41,11 +48,35 @@ int main() {
 
 
 void* producer(void *param) {
-    //TODO: produce some data
-    printf("Producer thread");
+    printf("=========================== Start Producer ===========================\n");
+    sem_wait(&mutex);
+    int a;
+    for( a = 0; a < size; a++ ) {
+        int value = a + 10;
+        shared_data[a] = value;
+        printf("Produced value shared_data[%d] = %d \n ", a, value);
+    }
+    sem_post(&mutex);
 }
 
+
 void* consumer(void *param) {
-    //TODO: consumo some data
-    printf("Consumer thread");
+    printf("=========================== Start Consumer ===========================\n");
+    sem_wait(&mutex);
+    int i;
+    for( i = 0; i < size; i++ ) {
+        int value = shared_data[i];
+        printf("Consumed value shared_data[%d] = %d \n ", i, value);
+    }
+
+    sem_post(&mutex);
+}
+
+
+// helper
+void log_shared_data(int *value) {
+    int i;
+    for( i = 0; i < size; i++ ) {
+        printf("Shared_data[%d] = %d \n", i, value[i]);
+    }
 }
